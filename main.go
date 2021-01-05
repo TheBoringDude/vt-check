@@ -1,0 +1,51 @@
+package main
+
+import (
+	"log"
+
+	"github.com/leaanthony/mewn"
+	"github.com/wailsapp/wails"
+)
+
+// WailsInit => init runtime for files structs
+func (f *File) WailsInit(runtime *wails.Runtime) error {
+	// set runtime
+	f.runtime = runtime
+
+	return nil
+}
+
+//WailsInit => init runtime for API strutcts
+func (a *API) WailsInit(runtime *wails.Runtime) error {
+	// set runtime
+	a.runtime = runtime
+
+	return nil
+}
+
+func main() {
+
+	js := mewn.String("./frontend/dist/app.js")
+	css := mewn.String("./frontend/dist/app.css")
+
+	// create instance of API
+	api, err := NewAPI()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// create instance of File
+	file := NewFileHandler()
+
+	app := wails.CreateApp(&wails.AppConfig{
+		Width:  950,
+		Height: 600,
+		Title:  "vt-check",
+		JS:     js,
+		CSS:    css,
+		Colour: "#131313",
+	})
+	app.Bind(api)
+	app.Bind(file)
+	app.Run()
+}
