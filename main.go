@@ -19,8 +19,15 @@ func (f *File) WailsInit(runtime *wails.Runtime) error {
 func (a *API) WailsInit(runtime *wails.Runtime) error {
 	// set runtime
 	a.runtime = runtime
+	a.logger = a.runtime.Log.New("VT-Check API file watcher...")
 
-	return nil
+	a.filename = APICONFIGFILENAME
+
+	// create a blank file if doesn't exist
+	a.CreateFile()
+
+	// start watching the api file and return it
+	return a.StartWatcher()
 }
 
 func main() {

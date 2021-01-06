@@ -55,16 +55,24 @@
                       <v-text-field
                         label="Api Key*"
                         required
-                        value="1"
+                        v-model="form_api"
                       ></v-text-field>
                     </v-col>
                   </v-container>
                   <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn
+                      color="gray darken-1"
+                      text
+                      @click="dialog = form_api.length > 0 ? false : true"
+                      outlined
+                    >
+                      Close
+                    </v-btn>
+                    <v-btn
                       color="green darken-1"
                       text
-                      @click="dialog = false"
+                      @click="SaveAPI"
                       outlined
                     >
                       Save
@@ -82,14 +90,17 @@
 
 <script>
 import Result from './components/Results.vue'
+import Wails from '@wailsapp/runtime'
+
 export default {
   data: () => ({
     dialog: false,
-    form_upload: false,
+    form_api: '',
+    form_upload: true,
     uploading: false,
     upload_filename: '',
     upload_status: 'Uploading...',
-    done_upload: true,
+    done_upload: false,
     result: {},
   }),
   watch: {
@@ -104,6 +115,7 @@ export default {
     },
   },
   methods: {
+    // handles selecting file to be uploaded
     SelectFile() {
       window.backend.File.SelectFileUpload().then((file) => {
         if (file !== '') {
@@ -111,6 +123,48 @@ export default {
         }
       })
     },
+    // handles loading the api file to the app
+    LoadAPI() {
+      window.backend.API.Load()
+        .then((res) => {
+          const data = JSON.parse(res)
+          this.form_api = data.api
+
+          // check the loaded api
+          this.CheckAPIFile()
+        })
+        .catch((e) => console.error(e))
+    },
+    // handles saving a new api
+    SaveAPI() {
+      if (this.form_api.length > 0 || this.form_api !== undefined) {
+        const NewAPI = {
+          api: this.form_api,
+        }
+
+        // save new api
+        window.backend.API.Save(JSON.stringify(NewAPI, null, 2))
+          .then()
+          .catch((e) => console.error(e))
+      }
+    },
+    // handles checkingif the api is valid or not
+    CheckAPIFile() {
+      // check if the api exists in the file
+      if (this.form_api === undefined) {
+        this.dialog = true // show if none
+      } else {
+        this.dialog = false
+      }
+    },
+  },
+  mounted() {
+    Wails.Events.On('datamodified', () => {
+      this.LoadAPI()
+    })
+
+    // load on startup
+    this.LoadAPI()
   },
   components: {
     Result,
