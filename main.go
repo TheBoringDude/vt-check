@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"fmt"
 
 	"github.com/leaanthony/mewn"
 	"github.com/wailsapp/wails"
@@ -55,4 +56,9 @@ func main() {
 	app.Bind(api)
 	app.Bind(file)
 	app.Run()
+}
+
+// LogRes - logs
+func LogRes(content string){
+	fmt.Println(content)
 }

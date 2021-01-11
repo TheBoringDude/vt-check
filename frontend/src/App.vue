@@ -22,18 +22,19 @@
                 <v-progress-linear
                   indeterminate
                   color="green"
+                  v-if="!done_upload"
                 ></v-progress-linear>
               </div>
             </div>
             <!-- results button actons -->
             <div class="results-main" v-if="done_upload">
-              <Result :results="result" :upload_filename="upload_filename" />
+              <Result :data="result" :upload_filename="upload_filename" />
             </div>
 
             <!-- main form -->
             <div class="main-form" v-if="form_upload">
               <p>Please select a file to upload and check...</p>
-              <v-btn x-large block primary @click="SelectFile">
+              <v-btn x-large block primary @click="upload">
                 Choose a file...
               </v-btn>
             </div>
@@ -92,6 +93,9 @@
 import Result from './components/Results.vue'
 import Wails from '@wailsapp/runtime'
 
+import axios from 'axios'
+// import fs from 'fs'
+
 export default {
   data: () => ({
     dialog: false,
@@ -111,10 +115,17 @@ export default {
         }
         this.uploading = true
         this.form_upload = false
+
+        // run the uploader
+        this.UploadFile()
       },
     },
   },
   methods: {
+    upload() {
+      this.upload_filename =
+        '/home/theboringdude/Desktop/algotest/src/tailwind.css'
+    },
     // handles selecting file to be uploaded
     SelectFile() {
       window.backend.File.SelectFileUpload().then((file) => {
@@ -156,6 +167,50 @@ export default {
       } else {
         this.dialog = false
       }
+    },
+    // upload files
+    UploadFile() {
+      console.log(this.form_api)
+      // call the backend upload function
+      window.backend.File.FileUpload(this.upload_filename, this.form_api)
+        .then((res) => {
+          // convert response to json
+          const data = JSON.parse(res)
+          const resp = JSON.parse(data.response)
+
+          // the statuscode should be '200'
+          // others are errors
+          if (data.statusCode == 200) {
+            this.upload_status = 'Retrieving results...'
+
+            // get another request
+            this.requestAnalysis(resp.data.id)
+          }
+        })
+        .catch((e) => console.error(e))
+    },
+    requestAnalysis(analysisId) {
+      axios
+        .get(`https://www.virustotal.com/api/v3/analyses/${analysisId}`, {
+          headers: {
+            'x-apikey': this.form_api,
+          },
+        })
+        .then((res) => {
+          if (res.status == 200) {
+            // set result response
+            this.result = res.data
+
+            console.log(res.data.data.attributes)
+
+            // upload status
+            this.upload_status = 'Done...'
+
+            // set to done
+            this.done_upload = true
+          }
+        })
+        .catch((e) => console.error(e))
     },
   },
   mounted() {
