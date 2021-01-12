@@ -28,13 +28,17 @@
             </div>
             <!-- results button actons -->
             <div class="results-main" v-if="done_upload">
-              <Result :data="result" :upload_filename="upload_filename" />
+              <Result
+                :data="result"
+                :upload_filename="upload_filename"
+                @reset-new="ResetNewSession"
+              />
             </div>
 
             <!-- main form -->
             <div class="main-form" v-if="form_upload">
               <p>Please select a file to upload and check...</p>
-              <v-btn x-large block primary @click="upload">
+              <v-btn x-large block primary @click="SelectFile">
                 Choose a file...
               </v-btn>
             </div>
@@ -93,9 +97,6 @@
 import Result from './components/Results.vue'
 import Wails from '@wailsapp/runtime'
 
-import axios from 'axios'
-// import fs from 'fs'
-
 export default {
   data: () => ({
     dialog: false,
@@ -120,11 +121,30 @@ export default {
         this.UploadFile()
       },
     },
+    result: {
+      handler(result) {
+        if (Object.keys(result).length > 0) {
+          // upload status
+          this.upload_status = 'Done...'
+
+          // set to done
+          this.done_upload = true
+        }
+      },
+    },
   },
   methods: {
     upload() {
-      this.upload_filename =
-        '/home/theboringdude/Desktop/algotest/src/tailwind.css'
+      this.upload_filename = '/home/theboringdude/elyca'
+    },
+    // create a new session and reset all vars (except the api)
+    ResetNewSession() {
+      this.form_upload = true
+      this.uploading = false
+      this.upload_filename = ''
+      this.upload_status = 'Uploading...'
+      this.done_upload = false
+      this.result = {}
     },
     // handles selecting file to be uploaded
     SelectFile() {
@@ -170,9 +190,10 @@ export default {
     },
     // upload files
     UploadFile() {
-      console.log(this.form_api)
       // call the backend upload function
-      window.backend.File.FileUpload(this.upload_filename, this.form_api)
+      // NOTE: the app will not work if the frontend will
+      // be the one to try and upload it
+      window.backend.File.FileUpload(this.form_api)
         .then((res) => {
           // convert response to json
           const data = JSON.parse(res)
@@ -181,34 +202,21 @@ export default {
           // the statuscode should be '200'
           // others are errors
           if (data.statusCode == 200) {
-            this.upload_status = 'Retrieving results...'
+            this.upload_status = `Retrieving results...`
 
             // get another request
-            this.requestAnalysis(resp.data.id)
+            this.RequestAnalysis(resp.data.id)
           }
         })
         .catch((e) => console.error(e))
     },
-    requestAnalysis(analysisId) {
-      axios
-        .get(`https://www.virustotal.com/api/v3/analyses/${analysisId}`, {
-          headers: {
-            'x-apikey': this.form_api,
-          },
-        })
+    // get again the request analysis after upload
+    RequestAnalysis(analysisId) {
+      // using axios is not working, so I used the backend
+      // to send a request and retrieve back the analysis results
+      window.backend.File.GetAnalysisFromID(analysisId, this.form_api)
         .then((res) => {
-          if (res.status == 200) {
-            // set result response
-            this.result = res.data
-
-            console.log(res.data.data.attributes)
-
-            // upload status
-            this.upload_status = 'Done...'
-
-            // set to done
-            this.done_upload = true
-          }
+          this.result = JSON.parse(res)
         })
         .catch((e) => console.error(e))
     },

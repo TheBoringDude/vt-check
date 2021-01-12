@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -49,23 +48,19 @@ func (f *File) SelectFileUpload() string {
 	if len(filename) > 0 {
 		// set filename on the struct
 		f.filename = filename
-
-		// return the filename
-		return filename
 	}
 
-	return ""
+	// return the filename
+	return filename
 }
 
 // FileUpload uploads the set filename to the api
 // It returns the status code and the response string
 // based from: https://gist.github.com/andrewmilson/19185aab2347f6ad29f5
-func (f *File) FileUpload(filename, apiKey string) string {
+func (f *File) FileUpload(apiKey string) string {
 	// open the file (change to f.filename)
-	file, _ := os.Open(filename)
+	file, _ := os.Open(f.filename)
 	defer file.Close()
-
-	fmt.Println(filename)
 
 	// create multipart form
 	body := &bytes.Buffer{}
@@ -107,4 +102,31 @@ func (f *File) FileUpload(filename, apiKey string) string {
 	out, _ := json.Marshal(returnResp)
 
 	return string(out)
+}
+
+// GetAnalysisFromID requests the analysis result from the VT api
+func (f *File) GetAnalysisFromID(analysisID, apiKey string) string {
+	// create new request
+	req, _ := http.NewRequest("GET", "https://www.virustotal.com/api/v3/analyses/"+analysisID, nil)
+
+	// set api key
+	req.Header.Add("x-apikey", apiKey) // virustotal apikey
+
+	// new client
+	client := &http.Client{}
+
+	// send and get response
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	// get content
+	content, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return string(content)
 }

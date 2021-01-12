@@ -7,7 +7,7 @@
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ on, attrs }">
-      <v-btn color="secondary">
+      <v-btn color="secondary" @click="$emit('reset-new')">
         Check Another File
       </v-btn>
       <v-btn color="primary" dark v-bind="attrs" v-on="on">
@@ -53,10 +53,11 @@
                     size="30"
                     :color="handleResultColor(result.category)"
                   >
+                    <!-- undetected -->
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
-                      fill="currentColor"
+                      fill="#ffffff"
                     >
                       <path
                         fill-rule="evenodd"
@@ -64,6 +65,35 @@
                         clip-rule="evenodd"
                       />
                     </svg>
+                    <!-- unsupported-type || failure -->
+                    <!-- <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="#ffffff"
+                      v-else-if="
+                        result.category === 'type-unsupported' ||
+                        result.category === 'failure'
+                      "
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg> -->
+                    <!-- something else, error maybe -->
+                    <!-- <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="#ffffff"
+                      v-else
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z"
+                        clip-rule="evenodd"
+                      />
+                    </svg> -->
                   </v-list-item-avatar>
                 </v-list-item>
               </v-card>
@@ -94,7 +124,11 @@ export default {
         return 'green accent-3'
       }
 
-      if (resCategory == 'type-unsupported') {
+      if (
+        resCategory == 'type-unsupported' ||
+        resCategory == 'failure' ||
+        resCategory == 'timeout'
+      ) {
         return 'grey lighten-1'
       }
 
