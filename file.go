@@ -21,6 +21,7 @@ var virustotalAPI = "https://www.virustotal.com/api/v3/files"
 type File struct {
 	filename string
 	runtime  *wails.Runtime
+	client   *http.Client
 }
 
 // ReturnResponse constructs a return response
@@ -36,9 +37,9 @@ type response struct {
 // NewFileHandler attemps to create an instance of File struct
 func NewFileHandler() *File {
 	// create a new instance
-	instance := &File{}
-
-	return instance
+	return &File{
+		client: &http.Client{},
+	}
 }
 
 // SelectFileUpload pop-ups a dialog for file selection...
@@ -76,11 +77,8 @@ func (f *File) FileUpload(apiKey string) string {
 	req.Header.Add("Content-Type", writer.FormDataContentType()) // multipart/form-data
 	req.Header.Add("x-apikey", apiKey)                           // virustotal apikey
 
-	// new client
-	client := &http.Client{}
-
 	// send request
-	resp, err := client.Do(req)
+	resp, err := f.client.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -112,11 +110,8 @@ func (f *File) GetAnalysisFromID(analysisID, apiKey string) string {
 	// set api key
 	req.Header.Add("x-apikey", apiKey) // virustotal apikey
 
-	// new client
-	client := &http.Client{}
-
 	// send and get response
-	resp, err := client.Do(req)
+	resp, err := f.client.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}

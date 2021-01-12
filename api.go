@@ -63,6 +63,7 @@ func (a *API) CreateFile() {
 
 // StartWatcher => watches file changes
 // made into the main config file
+// code is based from the main `wails basic tutorial`
 func (a *API) StartWatcher() error {
 	a.logger.Info("Starting Watcher ... ")
 

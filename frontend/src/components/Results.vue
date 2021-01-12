@@ -16,14 +16,10 @@
     </template>
     <v-card>
       <v-toolbar dark color="primary">
-        <v-btn icon dark @click="show_results = hideResults">
+        <v-btn icon dark @click="show_results = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
         <v-toolbar-title>Results: {{ upload_filename }}</v-toolbar-title>
-        <!-- <v-spacer></v-spacer>
-        <v-toolbar-items>
-          <v-btn dark text @click="show_results = false">Save</v-btn>
-        </v-toolbar-items> -->
       </v-toolbar>
       <v-list three-line subheader>
         <v-subheader>General</v-subheader>
@@ -108,17 +104,16 @@
 <script>
 export default {
   name: 'Result',
-  computed: {
-    hideResults() {
-      return false
-    },
-  },
   data() {
     return {
       show_results: false,
     }
   },
   methods: {
+    // it returns the color to be rendered 
+    // depending on the result from each av scanner
+    // this might change once I get the full list of 
+    // result categories
     handleResultColor(resCategory) {
       if (resCategory == 'undetected') {
         return 'green accent-3'

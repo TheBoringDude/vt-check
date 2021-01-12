@@ -134,9 +134,6 @@ export default {
     },
   },
   methods: {
-    upload() {
-      this.upload_filename = '/home/theboringdude/elyca'
-    },
     // create a new session and reset all vars (except the api)
     ResetNewSession() {
       this.form_upload = true
