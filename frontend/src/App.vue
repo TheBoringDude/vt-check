@@ -213,7 +213,10 @@ export default {
       // to send a request and retrieve back the analysis results
       window.backend.File.GetAnalysisFromID(analysisId, this.form_api)
         .then((res) => {
-          this.result = JSON.parse(res)
+          const result = JSON.parse(res)
+
+          // get only the values and convert it to array
+          this.result = Object.values(result.data.attributes.results)
         })
         .catch((e) => console.error(e))
     },
