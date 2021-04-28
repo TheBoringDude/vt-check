@@ -10,7 +10,7 @@
   "dependencies": {
     "@fontsource/roboto": "^4.1.0",
     "@wailsapp/runtime": "^1.0.10",
-    "core-js": "^3.6.4",
+    "core-js": "3.11.0",
     "regenerator-runtime": "^0.13.3",
     "vue": "^2.6.11",
     "vuetify": "^2.3.15"
